@@ -11,7 +11,8 @@ Dim ErrMsg As String
     End If
     
     If ActiveWorkbook.ActiveSheet.Name = "Feature Timeline" Then
-        Call GoToAddress(ActiveCell.Address)
+        If GoToAddress(ActiveCell.Address) Then
+        End If
     Else
         ErrMsg = "This operation valid only from 'Feature Timeline' worksheet"
         MsgBox ErrMsg, vbExclamation, "Au10tix - Features Guntt"
@@ -25,16 +26,28 @@ Public Sub RefreshTFSData()
 End Sub
 
 Function GoToAddress(Address) As String
+On Error GoTo MissedData
 
-Dim GoToRow As String
+Dim GoToRow, ErrMsg As String
 Dim GoToRange As Range
 
+GoToRow = 0
  Set GoToRange = Worksheets("Feature Timeline").Range(Address)
  
  GoToRow = Application.WorksheetFunction.Match(GoToRange.Value, Worksheets("TFS Data").Columns(1), 0)
- Application.Goto Reference:=Worksheets("TFS Data").Range("A" & GoToRow), scroll:=True
- Set GoToRange = Nothing
+ If GoToRow <> 0 Or IsEmpty(GoToRow) Then
+    Application.Goto Reference:=Worksheets("TFS Data").Range("A" & GoToRow), scroll:=True
+    Set GoToRange = Nothing
+    GoToAddress = True
+ End If
  
+MissedData:
+    If Err.Number = 1004 Then
+        ErrMsg = "Selected feature not found on TFS data"
+        MsgBox ErrMsg, vbExclamation, "Au10tix - Features Guntt"
+        GoToAddress = False
+    End If
+
 End Function
 
 Function RefreshData(Address) As Boolean
