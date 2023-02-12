@@ -83,15 +83,15 @@ Function RefreshData(Address) As Boolean
 On Error Resume Next
 
 '-- Refresh TFS data
-    Sheets("TFS Data").Select
+    Application.Worksheets(UCase("TFS DATA")).Select
     Selection.AutoFilter
-    ActiveWorkbook.Worksheets("TFS Data").ListObjects( _
+    ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
         "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("TFS Data").ListObjects( _
+    ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
         "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort.SortFields.Add2 Key:=Range( _
         "VSTS_1767b646_5ecb_4441_83ba_052a656d849c[ID]"), SortOn:=xlSortOnValues, _
         Order:=xlAscending, DataOption:=xlSortNormal
-    With ActiveWorkbook.Worksheets("TFS Data").ListObjects( _
+    With ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
         "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort
         .Header = xlYes
         .MatchCase = False
@@ -100,7 +100,7 @@ On Error Resume Next
         .Apply
     End With
 '-- Return focus to starting worksheet/cell
-    Sheets("Feature Timeline").Select
+    Sheets(UCase("FEATURE TIMELINE")).Select
     Range(Address).Select
 
 End Function
