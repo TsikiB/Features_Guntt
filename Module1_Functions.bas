@@ -10,8 +10,11 @@ Dim ErrMsg As String
         Exit Sub
     End If
     
-    If ActiveWorkbook.ActiveSheet.Name = "Feature Timeline" Then
+    If UCase(ActiveWorkbook.ActiveSheet.Name) = "FEATURE TIMELINE" Then
         If GoToAddress(ActiveCell.Address) Then
+        End If
+    ElseIf UCase(ActiveWorkbook.ActiveSheet.Name) = "TFS DATA" Then
+        If BackToReference(ActiveCell.Address) Then
         End If
     Else
         ErrMsg = "This operation valid only from 'Feature Timeline' worksheet"
@@ -32,11 +35,11 @@ Dim GoToRow, ErrMsg As String
 Dim GoToRange As Range
 
 GoToRow = 0
- Set GoToRange = Worksheets("Feature Timeline").Range(Address)
+ Set GoToRange = Worksheets(UCase("FEATURE TIMELINE")).Range(Address)
  
- GoToRow = Application.WorksheetFunction.Match(GoToRange.Value, Worksheets("TFS Data").Columns(1), 0)
+ GoToRow = Application.WorksheetFunction.Match(GoToRange.Value, Worksheets(UCase("TFS DATA")).Columns(1), 0)
  If GoToRow <> 0 Or IsEmpty(GoToRow) Then
-    Application.Goto Reference:=Worksheets("TFS Data").Range("A" & GoToRow), scroll:=True
+    Application.Goto Reference:=Worksheets(UCase("TFS DATA")).Range("A" & GoToRow), scroll:=True
     Set GoToRange = Nothing
     GoToAddress = True
  End If
@@ -46,6 +49,31 @@ MissedData:
         ErrMsg = "Selected feature not found on TFS data"
         MsgBox ErrMsg, vbExclamation, "Au10tix - Features Guntt"
         GoToAddress = False
+    End If
+
+End Function
+
+Function BackToReference(Address) As String
+On Error GoTo MissedData
+
+Dim GoToRow, ErrMsg As String
+Dim GoToRange As Range
+
+GoToRow = 0
+ Set GoToRange = Worksheets(UCase("TFS DATA")).Range(Address)
+ 
+ GoToRow = Application.WorksheetFunction.Match(GoToRange.Value, Worksheets(UCase("FEATURE TIMELINE")).Columns(1), 0)
+ If GoToRow <> 0 Or IsEmpty(GoToRow) Then
+    Application.Goto Reference:=Worksheets(UCase("FEATURE TIMELINE")).Range("A" & GoToRow), scroll:=True
+    Set GoToRange = Nothing
+    BackToReference = True
+ End If
+ 
+MissedData:
+    If Err.Number = 1004 Then
+        ErrMsg = "Selected feature not found on Feature Timeline"
+        MsgBox ErrMsg, vbExclamation, "Au10tix - Features Guntt"
+        BackToReference = False
     End If
 
 End Function

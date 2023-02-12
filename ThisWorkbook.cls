@@ -16,7 +16,8 @@ Dim MyMenu As Object
 
     With MyMenu.MenuItems
         .Add "GoTo Data", "ClickToData", , 1, , ""
-        .Add "Refresh TFS Data", "RefreshTFSData", , 2, , ""
+        .Add "Back To Reference", "BackToReference", , 2, , ""
+        .Add "Refresh TFS Data", "RefreshTFSData", , 3, , ""
     End With
     
     Set MyMenu = Nothing
