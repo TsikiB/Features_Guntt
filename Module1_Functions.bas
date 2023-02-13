@@ -24,8 +24,15 @@ Dim ErrMsg As String
 End Sub
 Public Sub RefreshTFSData()
 
-    Call RefreshData(ActiveCell.Address)
- 
+Dim Address As String
+
+If UCase(Application.ActiveSheet.Name) = UCase("FEATURE TIMELINE") Then
+    Address = ActiveCell.Address
+Else
+    Address = "$A$2"
+End If
+    Call RefreshData(Address)
+
 End Sub
 
 Function GoToAddress(Address) As String
@@ -83,25 +90,52 @@ Function RefreshData(Address) As Boolean
 On Error Resume Next
 
 '-- Refresh TFS data
-    Application.Worksheets(UCase("TFS DATA")).Select
-    Selection.AutoFilter
-    ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
-        "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
-        "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort.SortFields.Add2 Key:=Range( _
-        "VSTS_1767b646_5ecb_4441_83ba_052a656d849c[ID]"), SortOn:=xlSortOnValues, _
-        Order:=xlAscending, DataOption:=xlSortNormal
-    With ActiveWorkbook.Worksheets(UCase("TFS DATA")).ListObjects( _
-        "VSTS_1767b646_5ecb_4441_83ba_052a656d849c").Sort
-        .Header = xlYes
-        .MatchCase = False
-        .Orientation = xlTopToBottom
-        .SortMethod = xlPinYin
-        .Apply
-    End With
+RefreshTFSQuery ("TFS Data")
+
 '-- Return focus to starting worksheet/cell
     Sheets(UCase("FEATURE TIMELINE")).Select
     Range(Address).Select
 
 End Function
 
+Public Function RefreshTFSQuery(wshName)
+
+On Error GoTo Err
+
+Dim PauseCounter As Integer
+Dim Flag_RefreshTFS As Boolean
+Dim RefreshButton As CommandBarControl
+    
+PauseCounter = 0
+Flag_RefreshTFS = False
+
+   ActiveWorkbook.Sheets(wshName).Visible = xlSheetVisible
+   Set RefreshButton = Application.CommandBars.FindControl(Tag:="IDC_REFRESH")
+
+    With Application.Worksheets(wshName).Select
+        Do While PauseCounter < 5
+            If RefreshButton.Enabled Then
+                RefreshButton.Execute
+                Flag_RefreshTFS = True
+                Exit Do
+            Else
+                Application.Wait (Now + TimeValue("0:00:02"))
+                PauseCounter = PauseCounter + 1
+            End If
+        Loop
+        
+        Set RefreshButton = Nothing
+        If Not Flag_RefreshTFS Then
+            MsgBox "Warning: Refresh Button is not avilable !!"
+            Exit Function
+        End If
+
+    End With
+
+RefreshTFSQuery = True
+
+Err:
+    Application.StatusBar = Err.Description
+    TheErrorText = Err.Description
+
+End Function
